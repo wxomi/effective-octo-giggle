@@ -19,12 +19,17 @@ app.listen(PORT, async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+    /*
+      useNewUrlParser option is used to parse the MongoDB connection string using the new URL parser in MongoDB.
+      The useUnifiedTopology option is used to enable the new unified topology engine in MongoDB,
+      which provides better support for replica sets and sharded clusters.
+    */
     console.log("Database connected");
   } catch (error) {
     console.log(error);
   }
 
   console.log(`Server is running on port ${PORT}`);
-  // weeklyJob.start();
-  // revisionJob.start();
+  weeklyJob.start();
+  revisionJob.start();
 });

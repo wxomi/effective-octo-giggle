@@ -7,9 +7,28 @@ const sender = require("../config/emailConfig");
 //0 5 * * 6,0
 //0 5 * * *
 
-const createRevisionTracker = async (data) => {
+const insertRevisonsTrackers = async (req, res) => {
   try {
-    const response = await RevisionTracker.create(data);
+    const response = await RevisionTracker.insertMany(req.body, {
+      ordered: false,
+    });
+    res.status(200).json({
+      status: "success",
+      data: {
+        revisionTracker: response,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error,
+    });
+  }
+};
+
+const createRevisionTracker = async ({ url, name }) => {
+  try {
+    const response = await RevisionTracker.create({ url, name });
     return response;
   } catch (error) {
     throw error;
@@ -18,9 +37,10 @@ const createRevisionTracker = async (data) => {
 
 const getRevisionTracker = async () => {
   try {
-    const response = await RevisionTracker.find()
-      .sort({ updatedAt: 1 })
-      .limit(5);
+    /*  {
+      url: { $regex: "practice" },
+    }*/
+    const response = await RevisionTracker.find();
     return response;
   } catch (error) {
     throw error;
@@ -34,7 +54,7 @@ const weeklyJob = new CronJob("0 5 * * 6,0", async () => {
   const response = await RevisionTracker.find({
     createdAt: { $gte: oneWeekAgo },
   })
-    .sort({ createdAt: 1 })
+    .sort({ updatedAt: 1 })
     .limit(5);
   if (response.length === 0) {
     return;
@@ -177,6 +197,7 @@ const revisionJob = new CronJob("0 5 * * 1-5", async () => {
 module.exports = {
   createRevisionTracker,
   getRevisionTracker,
+  createRevisionTracker,
   revisionJob,
   weeklyJob,
 };

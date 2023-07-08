@@ -31,6 +31,7 @@ const getRevisionTrackerController = async (req, res) => {
     res.status(200).json({
       status: "success",
       data: {
+        length: response.length,
         revisionTracker: response,
       },
     });
@@ -42,9 +43,8 @@ const getRevisionTrackerController = async (req, res) => {
   }
 };
 
-const updateTodayRevisionController = async (req, res) => {};
-
 module.exports = {
   createRevisionTrackerController,
   getRevisionTrackerController,
+  createRevisionTrackerController,
 };
