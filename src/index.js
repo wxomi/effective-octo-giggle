@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const RevisionTrackerRoute = require("./routes");
 const { MONGODB_URL, PORT } = require("./config/serverConfig");
-const { dailyTaskJob } = require("./service/RevisionTracker");
+const { weeklyJob, revisionJob } = require("./service/RevisionTracker");
 
 const app = express();
 
@@ -25,5 +25,6 @@ app.listen(PORT, async () => {
   }
 
   console.log(`Server is running on port ${PORT}`);
-  dailyTaskJob.start();
+  // weeklyJob.start();
+  // revisionJob.start();
 });

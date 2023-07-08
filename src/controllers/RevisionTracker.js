@@ -5,11 +5,10 @@ const {
 
 const createRevisionTrackerController = async (req, res) => {
   try {
-    const { url, name, revisionRequired } = req.body;
+    const { url, name } = req.body;
     const response = await createRevisionTracker({
       url,
       name,
-      revisionRequired,
     });
 
     res.status(201).json({

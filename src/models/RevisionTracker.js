@@ -9,11 +9,7 @@ const RevisionTrackerSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  revisionRequired: {
-    type: Number,
-    required: true,
-  },
-  revised: {
+  revisonCount: {
     type: Number,
     default: 0,
   },
@@ -21,11 +17,9 @@ const RevisionTrackerSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  nextRevision: {
-    type: Number,
-  },
-  nextRevision: {
+  updatedAt: {
     type: Date,
+    default: Date.now,
   },
 });
 
