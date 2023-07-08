@@ -33,7 +33,6 @@ const getTodayQuestions = async (req, res) => {
     throw error;
   }
 };
-s;
 
 const dailyTaskJob = new CronJob("0 5 * * *", async () => {
   console.log("running a task every minute");
