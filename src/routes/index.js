@@ -10,4 +10,8 @@ router.post("/revise", createRevisionTrackerController);
 
 router.get("/revise", getRevisionTrackerController);
 
+router.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
 module.exports = router;
