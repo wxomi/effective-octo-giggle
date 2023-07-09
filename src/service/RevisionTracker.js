@@ -47,8 +47,8 @@ const getRevisionTracker = async () => {
   }
 };
 
-const weeklyJob = new CronJob("0 5 * * 6,0", async () => {
-  console.log("running a task every minute");
+const weeklyJob = new CronJob("30 10 * * 6,0", async () => {
+  console.log("cron job running weekly ", new Date().toLocaleString());
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   const response = await RevisionTracker.find({
@@ -59,7 +59,7 @@ const weeklyJob = new CronJob("0 5 * * 6,0", async () => {
   if (response.length === 0) {
     return;
   }
-
+  console.log("Sending email");
   sender.sendMail(
     {
       to: "sainianshul4987@gmail.com",
@@ -122,9 +122,9 @@ const weeklyJob = new CronJob("0 5 * * 6,0", async () => {
     }
   );
 });
-
-const revisionJob = new CronJob("0 5 * * 1-5", async () => {
-  console.log("running a task every minute");
+//cron accorind to utc time
+const revisionJob = new CronJob("30 10 * * 1-5", async () => {
+  console.log("cron job running revision ", new Date().toLocaleString());
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   const response = await RevisionTracker.find().sort({ updatedAt: 1 }).limit(5);
