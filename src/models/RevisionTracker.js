@@ -11,7 +11,7 @@ const RevisionTrackerSchema = mongoose.Schema({
     required: true,
     unique: true,
   },
-  revisonCount: {
+  revisionCount: {
     type: Number,
     default: 0,
   },

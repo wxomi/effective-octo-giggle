@@ -40,19 +40,38 @@ const getRevisionTracker = async () => {
     /*  {
       url: { $regex: "practice" },
     }*/
-    const response = await RevisionTracker.find();
+    // const today = new Date();
+    // const daysSinceSunday = today.getDay();
+    // const daysUntilPreviousSunday = daysSinceSunday === 0 ? 7 : daysSinceSunday;
+    // const previousSunday = new Date(today);
+    // previousSunday.setDate(today.getDate() - daysUntilPreviousSunday);
+
+    // const response = await RevisionTracker.find({
+    //   createdAt: { $gte: previousSunday },
+    // })
+    //   .sort({ updatedAt: 1 })
+    //   .limit(5);
+    // const response = await RevisionTracker.updateMany(
+    //   {},
+    //   { $rename: { revisonCount: "revisionCount" } }
+    // );
+
     return response;
   } catch (error) {
     throw error;
   }
 };
 
-const weeklyJob = new CronJob("30 10 * * 6,0", async () => {
+const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
   console.log("cron job running weekly ", new Date().toLocaleString());
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const today = new Date();
+  const daysSinceSunday = today.getDay();
+  const daysUntilPreviousSunday = daysSinceSunday === 0 ? 7 : daysSinceSunday;
+  const previousSunday = new Date(today);
+  previousSunday.setDate(today.getDate() - daysUntilPreviousSunday);
+
   const response = await RevisionTracker.find({
-    createdAt: { $gte: oneWeekAgo },
+    createdAt: { $gte: previousSunday },
   })
     .sort({ updatedAt: 1 })
     .limit(5);
@@ -92,7 +111,8 @@ const weeklyJob = new CronJob("30 10 * * 6,0", async () => {
           <p>Hi, here are your weekly revision questions</p>
           <ul>
             ${response.map(
-              (item) => `<li><a href=${item.url}>${item.name}</a></li>`
+              (item) =>
+                `<li><a href=${item.url}>${item.name} - Revision Count- ${item.revisionCount}</a></li>`
             )}
           </ul>
         </body>
@@ -123,7 +143,7 @@ const weeklyJob = new CronJob("30 10 * * 6,0", async () => {
   );
 });
 //cron accorind to utc time
-const revisionJob = new CronJob("30 10 * * 1-5", async () => {
+const revisionJob = new CronJob("0 0 * * 1-5", async () => {
   console.log("cron job running revision ", new Date().toLocaleString());
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -163,7 +183,8 @@ const revisionJob = new CronJob("30 10 * * 1-5", async () => {
           <p>Hi, here are your today's revision questions</p>
           <ul>
             ${response.map(
-              (item) => `<li><a href=${item.url}>${item.name}</a></li>`
+              (item) =>
+                `<li><a href=${item.url}>${item.name} - Revision Count- ${item.revisionCount}</a></li>`
             )}
           </ul>
         </body>
