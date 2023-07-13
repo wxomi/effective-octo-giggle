@@ -1,5 +1,6 @@
 const { CronJob } = require("cron");
 const RevisionTracker = require("../models/RevisionTracker");
+const RevisionQuestionsLog = require("../models/RevisionQuestionsLog");
 const sender = require("../config/emailConfig");
 
 // Path: src/routes/revisionTracker.js
@@ -128,6 +129,8 @@ const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
         //creating ids for today to check if the user has revised the question or not later that day
 
         try {
+          await RevisionQuestionsLog.create({ questions: ids });
+
           const filter = { _id: { $in: ids } };
           const update = {
             $inc: { revisionCount: 1 },
@@ -142,6 +145,16 @@ const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
     }
   );
 });
+
+const getTodayQuestions = async () => {
+  let ids = await RevisionQuestionsLog.find({
+    createdAt: { $gte: new Date().setHours(0, 0, 0, 0) },
+  });
+  ids = ids[0].questions;
+  const questions = await RevisionTracker.find({ _id: { $in: ids } });
+  return questions;
+};
+
 //cron accorind to utc time
 const revisionJob = new CronJob("0 0 * * 1-5", async () => {
   console.log("cron job running revision ", new Date().toLocaleString());
@@ -200,6 +213,8 @@ const revisionJob = new CronJob("0 0 * * 1-5", async () => {
         //creating ids for today to check if the user has revised the question or not later that day
 
         try {
+          await RevisionQuestionsLog.create({ questions: ids });
+
           const filter = { _id: { $in: ids } };
           const update = {
             $inc: { revisionCount: 1 },
@@ -219,6 +234,7 @@ module.exports = {
   createRevisionTracker,
   getRevisionTracker,
   createRevisionTracker,
+  getTodayQuestions,
   revisionJob,
   weeklyJob,
 };

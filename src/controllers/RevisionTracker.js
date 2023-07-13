@@ -1,6 +1,7 @@
 const {
   createRevisionTracker,
   getRevisionTracker,
+  getTodayQuestions,
 } = require("../service/RevisionTracker");
 
 const createRevisionTrackerController = async (req, res) => {
@@ -16,6 +17,21 @@ const createRevisionTrackerController = async (req, res) => {
       data: {
         revisionTracker: response,
       },
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error,
+    });
+  }
+};
+
+const getTodayQuestionsController = async (req, res) => {
+  try {
+    const response = await getTodayQuestions();
+    res.status(200).json({
+      status: "success",
+      data: response,
     });
   } catch (error) {
     res.status(400).json({
@@ -47,4 +63,5 @@ module.exports = {
   createRevisionTrackerController,
   getRevisionTrackerController,
   createRevisionTrackerController,
+  getTodayQuestionsController,
 };
