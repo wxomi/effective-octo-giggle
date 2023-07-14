@@ -63,9 +63,46 @@ const getRevisionTracker = async () => {
     throw error;
   }
 };
+const updateTodayQuestions = async (id) => {
+  try {
+    const response = await RevisionQuestionsLog.updateOne(
+      { questionId: id },
+      { isChecked: true }
+    );
+    const filter = { _id: { $in: id } };
+    const update = {
+      $inc: { revisionCount: 1 },
+      $set: { updatedAt: new Date() },
+    };
+    await RevisionTracker.updateOne(filter, update);
 
-const weeklyJob = new CronJob("0 0 * * 1-5", async () => {
-  console.log("cron job running weekly ", new Date().toLocaleString());
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+const getTodayQuestions = async () => {
+  const res = await RevisionQuestionsLog.find();
+  /*{
+    createdAt: { $gte: new Date().setHours(0, 0, 0, 0) },
+  }*/
+
+  const ids = res.map((item) => item.questionId);
+
+  let questions = await RevisionTracker.find({ _id: { $in: ids } });
+
+  const updatedQuestions = questions.map((item) => {
+    const index = res.findIndex(
+      (i) => i.questionId.toString() === item._id.toString()
+    );
+    return { ...item.toObject(), isChecked: res[index].isChecked };
+    //toObject() is used to convert mongoose object to plain js object
+  });
+
+  return updatedQuestions;
+};
+
+const getWeeklyQuestion = async () => {
   const today = new Date();
   const daysSinceSunday = today.getDay();
   const daysUntilPreviousSunday = daysSinceSunday === 0 ? 7 : daysSinceSunday;
@@ -77,6 +114,13 @@ const weeklyJob = new CronJob("0 0 * * 1-5", async () => {
   })
     .sort({ updatedAt: 1 })
     .limit(5);
+  return response;
+};
+
+const weeklyJob = new CronJob("0 0 * * 1-5", async () => {
+  console.log("cron job running weekly ", new Date().toLocaleString());
+  const response = await getWeeklyQuestion();
+
   if (response.length === 0) {
     return;
   }
@@ -143,52 +187,15 @@ const weeklyJob = new CronJob("0 0 * * 1-5", async () => {
   );
 });
 
-const updateTodayQuestions = async (id) => {
-  try {
-    const response = await RevisionQuestionsLog.updateOne(
-      { questionId: id },
-      { isChecked: true }
-    );
-    const filter = { _id: { $in: id } };
-    const update = {
-      $inc: { revisionCount: 1 },
-      $set: { updatedAt: new Date() },
-    };
-
-    await RevisionTracker.updateOne(filter, update);
-
-    return response;
-  } catch (error) {
-    throw error;
-  }
-};
-const getTodayQuestions = async () => {
-  const res = await RevisionQuestionsLog.find();
-  /*{
-    createdAt: { $gte: new Date().setHours(0, 0, 0, 0) },
-  }*/
-
-  const ids = res.map((item) => item.questionId);
-
-  let questions = await RevisionTracker.find({ _id: { $in: ids } });
-
-  const updatedQuestions = questions.map((item) => {
-    const index = res.findIndex(
-      (i) => i.questionId.toString() === item._id.toString()
-    );
-    return { ...item.toObject(), isChecked: res[index].isChecked };
-    //toObject() is used to convert mongoose object to plain js object
-  });
-
-  return updatedQuestions;
+const getRevisionQuestions = async () => {
+  const response = await RevisionTracker.find().sort({ updatedAt: 1 }).limit(5);
+  return response;
 };
 
 //cron accorind to utc time
 const revisionJob = new CronJob("0 0 * * 6,0", async () => {
   console.log("cron job running revision ", new Date().toLocaleString());
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const response = await RevisionTracker.find().sort({ updatedAt: 1 }).limit(5);
+  const response = await getRevisionQuestions();
   if (response.length === 0) {
     return;
   }
