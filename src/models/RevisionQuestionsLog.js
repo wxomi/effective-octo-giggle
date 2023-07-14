@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
 
 const RevisionQuestionsLogSchema = mongoose.Schema({
-  questions: {
-    type: Array,
-    required: true,
+  questionId: {
+    type: mongoose.Schema.Types.ObjectId,
   },
+  isChecked: {
+    type: Boolean,
+    default: false,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -12,7 +16,7 @@ const RevisionQuestionsLogSchema = mongoose.Schema({
 });
 
 const RevisionQuestionsLog = mongoose.model(
-  "RevisionQuestionsLog",
+  "revisionquestionslogs",
   RevisionQuestionsLogSchema
 );
 

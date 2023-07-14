@@ -3,11 +3,13 @@ const {
   getRevisionTrackerController,
   createRevisionTrackerController,
   getTodayQuestionsController,
+  updateTodayQuestionsController,
 } = require("../controllers/RevisionTracker");
 
 const router = express.Router();
 
 router.post("/revise", createRevisionTrackerController);
+router.put("/revise/:id", updateTodayQuestionsController);
 
 router.get("/revise", getRevisionTrackerController);
 

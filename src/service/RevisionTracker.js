@@ -1,5 +1,6 @@
 const { CronJob } = require("cron");
 const RevisionTracker = require("../models/RevisionTracker");
+const mongoose = require("mongoose");
 const RevisionQuestionsLog = require("../models/RevisionQuestionsLog");
 const sender = require("../config/emailConfig");
 
@@ -63,7 +64,7 @@ const getRevisionTracker = async () => {
   }
 };
 
-const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
+const weeklyJob = new CronJob("0 0 * * 1-5", async () => {
   console.log("cron job running weekly ", new Date().toLocaleString());
   const today = new Date();
   const daysSinceSunday = today.getDay();
@@ -82,7 +83,7 @@ const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
   console.log("Sending email");
   sender.sendMail(
     {
-      to: "sainianshul4987@gmail.com",
+      to: "garyh0st@icloud.com",
       subject: "Weekly Revision Questions",
       html: `
       <html>
@@ -129,15 +130,11 @@ const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
         //creating ids for today to check if the user has revised the question or not later that day
 
         try {
-          await RevisionQuestionsLog.create({ questions: ids });
+          await mongoose.connection.dropCollection("revisionquestionslogs");
+          console.log("Dropped");
+          const documents = ids.map((id) => ({ questionId: id }));
 
-          const filter = { _id: { $in: ids } };
-          const update = {
-            $inc: { revisionCount: 1 },
-            $set: { updatedAt: new Date() },
-          };
-
-          await RevisionTracker.updateMany(filter, update);
+          const response = await RevisionQuestionsLog.insertMany(documents);
         } catch (error) {
           throw error;
         }
@@ -146,17 +143,48 @@ const weeklyJob = new CronJob("0 0 * * 6,0", async () => {
   );
 });
 
+const updateTodayQuestions = async (id) => {
+  try {
+    const response = await RevisionQuestionsLog.updateOne(
+      { questionId: id },
+      { isChecked: true }
+    );
+    const filter = { _id: { $in: id } };
+    const update = {
+      $inc: { revisionCount: 1 },
+      $set: { updatedAt: new Date() },
+    };
+
+    await RevisionTracker.updateOne(filter, update);
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
 const getTodayQuestions = async () => {
-  let ids = await RevisionQuestionsLog.find({
+  const res = await RevisionQuestionsLog.find();
+  /*{
     createdAt: { $gte: new Date().setHours(0, 0, 0, 0) },
+  }*/
+
+  const ids = res.map((item) => item.questionId);
+
+  let questions = await RevisionTracker.find({ _id: { $in: ids } });
+
+  const updatedQuestions = questions.map((item) => {
+    const index = res.findIndex(
+      (i) => i.questionId.toString() === item._id.toString()
+    );
+    return { ...item.toObject(), isChecked: res[index].isChecked };
+    //toObject() is used to convert mongoose object to plain js object
   });
-  ids = ids[0].questions;
-  const questions = await RevisionTracker.find({ _id: { $in: ids } });
-  return questions;
+
+  return updatedQuestions;
 };
 
 //cron accorind to utc time
-const revisionJob = new CronJob("0 0 * * 1-5", async () => {
+const revisionJob = new CronJob("0 0 * * 6,0", async () => {
   console.log("cron job running revision ", new Date().toLocaleString());
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -213,15 +241,11 @@ const revisionJob = new CronJob("0 0 * * 1-5", async () => {
         //creating ids for today to check if the user has revised the question or not later that day
 
         try {
-          await RevisionQuestionsLog.create({ questions: ids });
+          await mongoose.connection.dropCollection("revisionquestionslogs");
+          console.log("Dropped");
+          const documents = ids.map((id) => ({ questionId: id }));
 
-          const filter = { _id: { $in: ids } };
-          const update = {
-            $inc: { revisionCount: 1 },
-            $set: { updatedAt: new Date() },
-          };
-
-          await RevisionTracker.updateMany(filter, update);
+          const response = await RevisionQuestionsLog.insertMany(documents);
         } catch (error) {
           throw error;
         }
@@ -235,6 +259,7 @@ module.exports = {
   getRevisionTracker,
   createRevisionTracker,
   getTodayQuestions,
+  updateTodayQuestions,
   revisionJob,
   weeklyJob,
 };
