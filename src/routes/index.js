@@ -4,6 +4,7 @@ const {
   createRevisionTrackerController,
   getTodayQuestionsController,
   updateTodayQuestionsController,
+  getAllQuestionsController,
 } = require("../controllers/RevisionTracker");
 
 const router = express.Router();
@@ -12,6 +13,7 @@ router.post("/revise", createRevisionTrackerController);
 router.put("/revise/:id", updateTodayQuestionsController);
 
 router.get("/revise", getRevisionTrackerController);
+router.get("/questions", getAllQuestionsController);
 
 router.get("/today", getTodayQuestionsController);
 

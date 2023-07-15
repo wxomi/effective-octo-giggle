@@ -117,7 +117,7 @@ const getWeeklyQuestion = async () => {
   return response;
 };
 
-const weeklyJob = new CronJob("0 0 * * 1-5", async () => {
+const weeklyJob = new CronJob("0 0 * * 0,6", async () => {
   console.log("cron job running weekly ", new Date().toLocaleString());
   const response = await getWeeklyQuestion();
 
@@ -193,7 +193,7 @@ const getRevisionQuestions = async () => {
 };
 
 //cron accorind to utc time
-const revisionJob = new CronJob("0 0 * * 6,0", async () => {
+const revisionJob = new CronJob("0 0 * * 1-5", async () => {
   console.log("cron job running revision ", new Date().toLocaleString());
   const response = await getRevisionQuestions();
   if (response.length === 0) {
@@ -261,12 +261,18 @@ const revisionJob = new CronJob("0 0 * * 6,0", async () => {
   );
 });
 
+const getAllQuestions = async () => {
+  const response = await RevisionTracker.find();
+  return response;
+};
+
 module.exports = {
   createRevisionTracker,
   getRevisionTracker,
   createRevisionTracker,
   getTodayQuestions,
   updateTodayQuestions,
+  getAllQuestions,
   revisionJob,
   weeklyJob,
 };

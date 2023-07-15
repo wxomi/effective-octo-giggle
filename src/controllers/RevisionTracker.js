@@ -3,6 +3,7 @@ const {
   getRevisionTracker,
   getTodayQuestions,
   updateTodayQuestions,
+  getAllQuestions,
 } = require("../service/RevisionTracker");
 
 const createRevisionTrackerController = async (req, res) => {
@@ -76,10 +77,26 @@ const getRevisionTrackerController = async (req, res) => {
   }
 };
 
+const getAllQuestionsController = async (req, res) => {
+  try {
+    const response = await getAllQuestions();
+    res.status(200).json({
+      status: "success",
+      data: response,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error,
+    });
+  }
+};
+
 module.exports = {
   createRevisionTrackerController,
   getRevisionTrackerController,
   createRevisionTrackerController,
   getTodayQuestionsController,
   updateTodayQuestionsController,
+  getAllQuestionsController,
 };
