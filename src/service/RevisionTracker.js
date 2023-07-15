@@ -261,8 +261,16 @@ const revisionJob = new CronJob("0 0 * * 1-5", async () => {
   );
 });
 
-const getAllQuestions = async () => {
-  const response = await RevisionTracker.find();
+/**
+ * Retrieves all revision questions from the database.
+ * @returns {Promise<Array>} An array of revision questions.
+ */
+
+const getAllQuestions = async (offset) => {
+  const response = await RevisionTracker.find()
+    .sort({ createdAt: -1 })
+    .skip(offset)
+    .limit(10);
   return response;
 };
 

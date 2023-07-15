@@ -79,7 +79,8 @@ const getRevisionTrackerController = async (req, res) => {
 
 const getAllQuestionsController = async (req, res) => {
   try {
-    const response = await getAllQuestions();
+    const offset = req.query.offset;
+    const response = await getAllQuestions(offset);
     res.status(200).json({
       status: "success",
       data: response,
