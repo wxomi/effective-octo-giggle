@@ -103,14 +103,16 @@ const getTodayQuestions = async () => {
 };
 
 const getWeeklyQuestion = async () => {
-  const today = new Date();
-  const daysSinceSunday = today.getDay();
-  const daysUntilPreviousSunday = daysSinceSunday === 0 ? 7 : daysSinceSunday;
-  const previousSunday = new Date(today);
-  previousSunday.setDate(today.getDate() - daysUntilPreviousSunday);
+  // const today = new Date();
+  // const daysSinceSunday = today.getDay();
+  // const daysUntilPreviousSunday = daysSinceSunday === 0 ? 7 : daysSinceSunday;
+  // const previousSunday = new Date(today);
+  // previousSunday.setDate(today.getDate() - daysUntilPreviousSunday);
 
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   const response = await RevisionTracker.find({
-    createdAt: { $gte: previousSunday },
+    createdAt: { $gte: oneWeekAgo },
   })
     .sort({ updatedAt: 1 })
     .limit(5);
