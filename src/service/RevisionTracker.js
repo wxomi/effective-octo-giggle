@@ -3,6 +3,7 @@ const RevisionTracker = require("../models/RevisionTracker");
 const mongoose = require("mongoose");
 const RevisionQuestionsLog = require("../models/RevisionQuestionsLog");
 const sender = require("../config/emailConfig");
+const TodoQuestions = require("../models/TodoQuestions");
 
 // Path: src/routes/revisionTracker.js
 //0 5 * * 1-5
@@ -31,6 +32,48 @@ const insertRevisonsTrackers = async (req, res) => {
 const createRevisionTracker = async ({ url, name }) => {
   try {
     const response = await RevisionTracker.create({ url, name });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const createTodoQuestions = async ({ url, name }) => {
+  try {
+    let response = await RevisionTracker.findOne({ url });
+
+    if (response) {
+      throw new Error("Question already exists");
+    }
+
+    response = await TodoQuestions.create({ url, name });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getTodoQuestion = async (offset) => {
+  try {
+    const response = await TodoQuestions.find({ isDeleted: false })
+      .sort({ createdAt: 1 })
+      .limit(10)
+      .skip(offset);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateTodosQuestions = async (id) => {
+  try {
+    const response = await TodoQuestions.findOneAndUpdate(
+      { _id: id },
+      { isDeleted: true },
+      { new: true }
+    );
+    const { url, name } = response;
+    await RevisionTracker.create({ url, name });
     return response;
   } catch (error) {
     throw error;
@@ -299,6 +342,9 @@ module.exports = {
   getTodayQuestions,
   updateTodayQuestions,
   getAllQuestions,
+  getTodoQuestion,
+  createTodoQuestions,
+  updateTodosQuestions,
   revisionJob,
   weeklyJob,
 };
