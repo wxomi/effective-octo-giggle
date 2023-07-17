@@ -81,6 +81,12 @@ const updateTodayQuestions = async (id) => {
     throw error;
   }
 };
+
+/**
+ * Retrieves all questions for today from the database and checks if they have been revised.
+ * If all questions have been revised, it deletes the revision log and inserts new questions for revision.
+ * @returns {Promise<Array>} An array of revision questions for today.
+ */
 const getTodayQuestions = async () => {
   const res = await RevisionQuestionsLog.find();
   /*{
@@ -98,6 +104,16 @@ const getTodayQuestions = async () => {
     return { ...item.toObject(), isChecked: res[index].isChecked };
     //toObject() is used to convert mongoose object to plain js object
   });
+
+  const allChecked = updatedQuestions.every((item) => item.isChecked === true);
+  if (allChecked) {
+    await RevisionQuestionsLog.deleteMany({});
+    const revisionQuestions = await getRevisionQuestions();
+    const ids = revisionQuestions.map((item) => item._id);
+    const documents = ids.map((id) => ({ questionId: id }));
+    const response = await RevisionQuestionsLog.insertMany(documents);
+    return revisionQuestions;
+  }
 
   return updatedQuestions;
 };
