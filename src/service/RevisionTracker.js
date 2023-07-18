@@ -57,8 +57,8 @@ const getTodoQuestion = async (offset) => {
   try {
     const response = await TodoQuestions.find({ isDeleted: false })
       .sort({ createdAt: 1 })
-      .limit(10)
-      .skip(offset);
+      .skip(offset * 10)
+      .limit(10);
     return response;
   } catch (error) {
     throw error;
@@ -330,7 +330,7 @@ const revisionJob = new CronJob("0 0 * * 1-5", async () => {
 const getAllQuestions = async (offset) => {
   const response = await RevisionTracker.find()
     .sort({ createdAt: -1 })
-    .skip(offset)
+    .skip(offset * 10)
     .limit(10);
   return response;
 };
