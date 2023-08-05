@@ -56,7 +56,7 @@ const createTodoQuestions = async ({ url, name }) => {
 const getTodoQuestion = async (offset) => {
   try {
     const response = await TodoQuestions.find({ isDeleted: false })
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .skip(offset * 10)
       .limit(10);
     return response;
